@@ -52,55 +52,55 @@ graduation_course('Ciencia da Computacao', 'DCC119').
 graduation_course('Ciencia da Computacao', 'DCC120').
 graduation_course('Ciencia da Computacao', 'DCC175').
 
-student_records(Student) :- 
-    findall(Course, student_course(Student, Course), Courses), 
-    write_list(Courses).
+% Main queries
+student_records(Student) :- query(Course, student_course(Student, Course)).
 
-course_catalog(Graduation) :- 
-    findall(Course, graduation_course(Graduation, Course), Courses), 
-    write_list(Courses).
+course_catalog(Graduation) :- query(Course, graduation_course(Graduation, Course)).
 
-has_taken(Course) :- 
-    findall(Student, student_course(Student, Course), Students), 
-    write_list(Students).
+has_taken(Course) :- query(Student, student_course(Student, Course)).
 
-need_to_take(Student) :-
-    findall(Course, need_to_take(Student, Course), Courses),
-    write_list(Courses).
+need_to_take(Student) :- query(Course, need_to_take(Student, Course)).
 
 need_to_take(Student, Course) :- 
     student_graduation(Student, Graduation), 
     graduation_course(Graduation, Course), 
     not(student_course(Student, Course)).
 
-graduation_students(Graduation) :- 
-    findall(Student, student_graduation(Student, Graduation), Students),
-    write_list(Students).
+graduation_students(Graduation) :- query(Student, student_graduation(Student, Graduation)).
 
-course_graduations(Course) :-
-    findall(Graduation, graduation_course(Graduation, Course), Graduations),
-    write_list(Graduations).
+course_graduations(Course) :- query(Graduation, graduation_course(Graduation, Course)).
 
+% Add entities
 add_student(Student) :- assertz(student(Student)).
 add_graduation(Graduation) :- assertz(graduation(Graduation)).
 add_course(Course) :- assertz(course(Course)).
 
+% Add relationships
 add_student_graduation(Student, Graduation) :- assertz(student_graduation(Student, Graduation)).
 add_student_course(Student, Course) :- assertz(student_course(Student, Course)).
 add_graduation_course(Graduation, Course) :- assertz(graduation_course(Graduation, Course)).
 
+% Remove entities
 remove_student(Student) :- retract(student(Student)).
 remove_graduation(Graduation) :- retract(graduation(Graduation)).
 remove_course(Course) :- retract(course(Course)).
 
+% Remove relationships
 remove_student_graduation(Student, Graduation) :- retract(student_graduation(Student, Graduation)).
 remove_student_course(Student, Course) :- retract(student_course(Student, Course)).
 remove_graduation_course(Graduation, Course) :- retract(graduation_course(Graduation, Course)).
 
+% Edit entities
 edit_student(OldStudent, NewStudent) :- retract(student(OldStudent)), assertz(student(NewStudent)).
 edit_graduation(Graduation) :- retract(graduation(Graduation)), assertz(graduation(Graduation)).
 edit_course(Course) :- retract(course(Course)), assertz(course(Course)).
 
+% Auxiliary predicate for executing queries and printing results
+query(Template, Goal) :- 
+    findall(Template, Goal, Bag), 
+    write_list(Bag).
+
 % Write the terms of a list
 write_list([]).
+write_list([X]) :- write(X).
 write_list([H | T]) :- write(H), nl, write_list(T).
