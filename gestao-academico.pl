@@ -40,8 +40,8 @@ student_graduation('Andre', 'Ciencia da Computacao').
 student_graduation('Bernardo', 'Sistema de Informacao').
 
 :- dynamic(student_course/2).
-student_course('Andre', 'DCC160', 78).
-student_course('Andre', 'DCC120', 45).
+student_course('Andre', 'DCC160', 78.0).
+student_course('Andre', 'DCC120', 45.5).
 
 :- dynamic(graduation_course/2).
 graduation_course('Ciencia da Computacao', 'DCC160').
@@ -58,17 +58,18 @@ student_records(Student) :- query(Course, student_course(Student, Course)).
 course_catalog(Graduation) :- query(Course, graduation_course(Graduation, Course)).
 
 has_taken(Course) :- query(Student, student_course(Student, Course, _)).
-
-has_taken(Course, MinimunGrade) :- query(Student, (student_course(Student, Course, Grande), Grade >= MinimunGrade)).
+has_taken(Course, MinimumGrade) :- 
+    query(Student, (student_course(Student, Course, Grade), Grade >= MinimumGrade)).
 
 need_to_take(Student) :- query(Course, need_to_take(Student, Course)).
-
 need_to_take(Student, Course) :- 
     student_graduation(Student, Graduation), 
     graduation_course(Graduation, Course), 
     not(student_course(Student, Course)).
 
 graduation_students(Graduation) :- query(Student, student_graduation(Student, Graduation)).
+graduation_students(Graduation, MinimumIra) :- 
+    query(Student, (student_graduation(Student, Graduation), ira(Student, Ira), Ira >= MinimumIra)).
 
 course_graduations(Course) :- query(Graduation, graduation_course(Graduation, Course)).
 
@@ -106,3 +107,14 @@ query(Template, Goal) :-
 write_list([]).
 write_list([X]) :- write(X).
 write_list([H | T]) :- write(H), nl, write_list(T).
+
+% Calculates the IRA from a Student
+ira(Student, Ira) :- 
+    findall(Grade, student_course(Student, _, Grade), Grades), 
+    sum_list(Grades, Sum), 
+    length(Grades, Length), 
+    Ira is Sum / Length. 
+
+% Sum all elements of a list
+sum_list([], 0).
+sum_list([H | T], Sum) :-  sum_list(T, Rest), Sum is H + Rest.
