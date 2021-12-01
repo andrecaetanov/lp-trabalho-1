@@ -40,8 +40,8 @@ student_graduation('Andre', 'Ciencia da Computacao').
 student_graduation('Bernardo', 'Sistema de Informacao').
 
 :- dynamic(student_course/2).
-student_course('Andre', 'DCC160').
-student_course('Andre', 'DCC120').
+student_course('Andre', 'DCC160', 78).
+student_course('Andre', 'DCC120', 45).
 
 :- dynamic(graduation_course/2).
 graduation_course('Ciencia da Computacao', 'DCC160').
@@ -57,7 +57,9 @@ student_records(Student) :- query(Course, student_course(Student, Course)).
 
 course_catalog(Graduation) :- query(Course, graduation_course(Graduation, Course)).
 
-has_taken(Course) :- query(Student, student_course(Student, Course)).
+has_taken(Course) :- query(Student, student_course(Student, Course, _)).
+
+has_taken(Course, MinimunGrade) :- query(Student, (student_course(Student, Course, Grande), Grade >= MinimunGrade)).
 
 need_to_take(Student) :- query(Course, need_to_take(Student, Course)).
 
@@ -92,8 +94,8 @@ remove_graduation_course(Graduation, Course) :- retract(graduation_course(Gradua
 
 % Edit entities
 edit_student(OldStudent, NewStudent) :- retract(student(OldStudent)), assertz(student(NewStudent)).
-edit_graduation(Graduation) :- retract(graduation(Graduation)), assertz(graduation(Graduation)).
-edit_course(Course) :- retract(course(Course)), assertz(course(Course)).
+edit_graduation(OldGraduation, NewGraduation) :- retract(graduation(OldGraduation)), assertz(graduation(NewGraduation)).
+edit_course(OldCourse, NewCourse) :- retract(course(OldCourse)), assertz(course(NewCourse)).
 
 % Auxiliary predicate for executing queries and printing results
 query(Template, Goal) :- 
