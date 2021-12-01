@@ -53,7 +53,7 @@ graduation_course('Ciencia da Computacao', 'DCC120').
 graduation_course('Ciencia da Computacao', 'DCC175').
 
 % Main queries
-student_records(Student) :- query(Course, student_course(Student, Course)).
+student_records(Student) :- query(Course, student_course(Student, Course, _)).
 
 course_catalog(Graduation) :- query(Course, graduation_course(Graduation, Course)).
 
@@ -65,7 +65,7 @@ need_to_take(Student) :- query(Course, need_to_take(Student, Course)).
 need_to_take(Student, Course) :- 
     student_graduation(Student, Graduation), 
     graduation_course(Graduation, Course), 
-    not(student_course(Student, Course)).
+    not(student_course(Student, Course, _)).
 
 graduation_students(Graduation) :- query(Student, student_graduation(Student, Graduation)).
 graduation_students(Graduation, MinimumIra) :- 
@@ -80,7 +80,7 @@ add_course(Course) :- assertz(course(Course)).
 
 % Add relationships
 add_student_graduation(Student, Graduation) :- assertz(student_graduation(Student, Graduation)).
-add_student_course(Student, Course) :- assertz(student_course(Student, Course)).
+add_student_course(Student, Course, Grade) :- assertz(student_course(Student, Course, Grade)).
 add_graduation_course(Graduation, Course) :- assertz(graduation_course(Graduation, Course)).
 
 % Remove entities
@@ -90,7 +90,7 @@ remove_course(Course) :- retract(course(Course)).
 
 % Remove relationships
 remove_student_graduation(Student, Graduation) :- retract(student_graduation(Student, Graduation)).
-remove_student_course(Student, Course) :- retract(student_course(Student, Course)).
+remove_student_course(Student, Course, Grade) :- retract(student_course(Student, Course, Grade)).
 remove_graduation_course(Graduation, Course) :- retract(graduation_course(Graduation, Course)).
 
 % Edit entities
@@ -112,7 +112,7 @@ write_list([H | T]) :- write(H), nl, write_list(T).
 ira(Student, Ira) :- 
     findall(Grade, student_course(Student, _, Grade), Grades), 
     sum_list(Grades, Sum), 
-    length(Grades, Length), 
+    length(Grades, Length),
     Ira is Sum / Length. 
 
 % Sum all elements of a list
