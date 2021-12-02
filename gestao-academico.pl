@@ -5,15 +5,15 @@
 % Como deve funcionar a edição de relacionamentos?
 
 % TODO
-% Tratar entidade ao adicionar um relacionamento
-% Tratar relacionamentos ao remove e editar uma entidade
-% Adicionar critérios de nota e IRA nas consultas
-% Implementar edição de relacionamentos (?)
+% Tratar relacionamentos ao editar graduações e disciplinas
+% Melhorar nomes de predicados e variáveis
 % Popular banco de dados com todas as disciplinas dos cursos
 % Popular banco de dados com 10 alunos em cada curso
 % Popular banco de dados com relacionamentos
 % Documentar código
+% Testar todos os predicados
 % Escrever relatório
+% Acrescentar peso das disciplinas no cálculo do IRA (?)
 
 %% Andre Caetano Vidal 201665010AC
 %% Bernardo Souza Cruz 201635019
@@ -37,11 +37,13 @@ course('DCC175').
 
 :- dynamic(student_graduation/2).
 student_graduation('Andre', 'Ciencia da Computacao').
-student_graduation('Bernardo', 'Sistema de Informacao').
+student_graduation('Bernardo', 'Ciencia da Computacao').
 
-:- dynamic(student_course/2).
-student_course('Andre', 'DCC160', 78.0).
-student_course('Andre', 'DCC120', 45.5).
+:- dynamic(student_course/3).
+student_course('Andre', 'DCC160', 49.0).
+student_course('Andre', 'DCC160', 70.0).
+student_course('Andre', 'DCC120', 65.5).
+student_course('Bernardo', 'DCC160', 78.0).
 
 :- dynamic(graduation_course/2).
 graduation_course('Ciencia da Computacao', 'DCC160').
@@ -52,51 +54,131 @@ graduation_course('Ciencia da Computacao', 'DCC119').
 graduation_course('Ciencia da Computacao', 'DCC120').
 graduation_course('Ciencia da Computacao', 'DCC175').
 
-% Main queries
-student_records(Student) :- query(Course, student_course(Student, Course, _)).
+% Records from a student
+student_records(Student) :- 
+    student(Student), 
+    query(Course, student_course(Student, Course, _)).
 
-course_catalog(Graduation) :- query(Course, graduation_course(Graduation, Course)).
+% Course catalog of a graduation
+course_catalog(Graduation) :- 
+    graduation(Graduation), 
+    query(Course, graduation_course(Graduation, Course)).
 
-has_taken(Course) :- query(Student, student_course(Student, Course, _)).
-has_taken(Course, MinimumGrade) :- 
+% Students that have taken a course
+have_taken(Course) :- 
+    course(Course),
+    query(Student, student_course(Student, Course, _)).
+
+% Students that has taken a course with a minimum grade
+have_taken(Course, MinimumGrade) :-
+    course(Course),
     query(Student, (student_course(Student, Course, Grade), Grade >= MinimumGrade)).
 
-need_to_take(Student) :- query(Course, need_to_take(Student, Course)).
+% Courses that one student is yet to take
+need_to_take(Student) :- 
+    student(Student),
+    query(Course, need_to_take(Student, Course)).
+
+% Check if a student still needs to take a course 
 need_to_take(Student, Course) :- 
+    student(Student),
+    course(Course),
     student_graduation(Student, Graduation), 
     graduation_course(Graduation, Course), 
-    not(student_course(Student, Course, _)).
+    not((student_course(Student, Course, Grade), Grade >= 60)).
 
-graduation_students(Graduation) :- query(Student, student_graduation(Student, Graduation)).
+% Students from a graduation
+graduation_students(Graduation) :- 
+    graduation(Graduation),
+    query(Student, student_graduation(Student, Graduation)).
+
+% Students from a graduation with a minimum IRA
 graduation_students(Graduation, MinimumIra) :- 
+    graduation(Graduation),
     query(Student, (student_graduation(Student, Graduation), ira(Student, Ira), Ira >= MinimumIra)).
 
-course_graduations(Course) :- query(Graduation, graduation_course(Graduation, Course)).
+% Students from a graduation with a minimum grade in a course
+graduation_students(Graduation, Course, MinimumGrade) :-
+    graduation(Graduation),
+    course(Course),
+    query(Student, (student_graduation(Student, Graduation), student_course(Student, Course, Grade), Grade >= MinimumGrade)).
+
+% Graduations with a course
+course_graduations(Course) :- 
+    course(Course),
+    query(Graduation, graduation_course(Graduation, Course)).
 
 % Add entities
 add_student(Student) :- assertz(student(Student)).
 add_graduation(Graduation) :- assertz(graduation(Graduation)).
 add_course(Course) :- assertz(course(Course)).
 
-% Add relationships
-add_student_graduation(Student, Graduation) :- assertz(student_graduation(Student, Graduation)).
-add_student_course(Student, Course, Grade) :- assertz(student_course(Student, Course, Grade)).
-add_graduation_course(Graduation, Course) :- assertz(graduation_course(Graduation, Course)).
-
 % Remove entities
-remove_student(Student) :- retract(student(Student)).
-remove_graduation(Graduation) :- retract(graduation(Graduation)).
-remove_course(Course) :- retract(course(Course)).
+remove_student(Student) :- 
+    retract(student(Student)),
+    retractall(student_graduation(Student, _)),
+    retractall(student_course(Student, _, _)).
+
+remove_graduation(Graduation) :- 
+    retract(graduation(Graduation)),
+    retractall(student_graduation(_, Graduation)),
+    retractall(graduation_course(Graduation, _)).
+
+remove_course(Course) :- 
+    retract(course(Course)),
+    retractall(student_course(_, Course, _)),
+    retractall(graduation_course(_, Course)).
+
+% Edit entities
+edit_student(OldName, NewName) :- 
+    retract(student(OldName)), 
+    assertz(student(NewName)),
+    findall(Graduation, student_graduation(OldName, Graduation), Graduations),
+    edit_student_graduation(OldName, NewName, Graduations),
+    findall(Course, student_course(OldName, Course, _), Courses),
+    edit_student_course(OldName, NewName, Courses).
+
+edit_student_course(_, _, []).
+edit_student_course(StudentOldName, StudentNewName, [H | T]) :-
+    student_course(StudentOldName, H, Grade),
+    retract(student_course(StudentOldName, H, Grade)),
+    assertz(student_course(StudentNewName, H, Grade)),
+    edit_student_course(StudentOldName, StudentNewName, T).
+
+edit_student_graduation(_, _, []).
+edit_student_graduation(StudentOldName, StudentNewName, [H | T]) :-
+    retract(student_graduation(StudentOldName, H)),
+    assertz(student_graduation(StudentNewName, H)),
+    edit_student_graduation(StudentOldName, StudentNewName, T).
+
+edit_graduation(OldName, NewName) :- retract(graduation(OldName)), assertz(graduation(NewName)).
+edit_course(OldName, NewName) :- retract(course(OldName)), assertz(course(NewName)).
+
+% Add relationships
+add_student_graduation(Student, Graduation) :- 
+    student(Student), 
+    graduation(Graduation),
+    assertz(student_graduation(Student, Graduation)).
+
+add_student_course(Student, Course, Grade) :- 
+    student(Student),
+    course(Course),
+    assertz(student_course(Student, Course, Grade)).
+
+add_graduation_course(Graduation, Course) :- 
+    graduation(Graduation),
+    course(Course),
+    assertz(graduation_course(Graduation, Course)).
 
 % Remove relationships
 remove_student_graduation(Student, Graduation) :- retract(student_graduation(Student, Graduation)).
 remove_student_course(Student, Course, Grade) :- retract(student_course(Student, Course, Grade)).
 remove_graduation_course(Graduation, Course) :- retract(graduation_course(Graduation, Course)).
 
-% Edit entities
-edit_student(OldStudent, NewStudent) :- retract(student(OldStudent)), assertz(student(NewStudent)).
-edit_graduation(OldGraduation, NewGraduation) :- retract(graduation(OldGraduation)), assertz(graduation(NewGraduation)).
-edit_course(OldCourse, NewCourse) :- retract(course(OldCourse)), assertz(course(NewCourse)).
+% Edit relationships
+edit_student_course_grade(Student, Course, OldGrade, NewGrade) :-
+    retract(student_course(Student, Course, OldGrade)),
+    assertz(student_course(Student, Course, NewGrade)).
 
 % Auxiliary predicate for executing queries and printing results
 query(Template, Goal) :- 
@@ -113,7 +195,7 @@ ira(Student, Ira) :-
     findall(Grade, student_course(Student, _, Grade), Grades), 
     sum_list(Grades, Sum), 
     length(Grades, Length),
-    Ira is Sum / Length. 
+    Ira is Sum / Length.
 
 % Sum all elements of a list
 sum_list([], 0).
