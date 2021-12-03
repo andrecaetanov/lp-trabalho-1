@@ -1,3 +1,6 @@
+%% Andre Caetano Vidal 201665010AC
+%% Bernardo Souza Abreu Cruz 201635019
+
 :- dynamic(student_course/3).
 student_course('Andre', 'DCC160', 84.0).
 student_course('Andre', 'MAT155', 65.0).

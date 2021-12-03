@@ -1,3 +1,6 @@
+%% Andre Caetano Vidal 201665010AC
+%% Bernardo Souza Abreu Cruz 201635019
+
 :- dynamic(student_graduation/2).
 student_graduation('Andre', 'Ciencia da Computacao').
 student_graduation('Bernardo', 'Ciencia da Computacao').

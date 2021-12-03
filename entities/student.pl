@@ -1,3 +1,6 @@
+%% Andre Caetano Vidal 201665010AC
+%% Bernardo Souza Abreu Cruz 201635019
+
 :- dynamic(student/1).
 student('Andre').
 student('Bernardo').

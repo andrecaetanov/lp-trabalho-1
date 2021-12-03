@@ -1,3 +1,6 @@
+%% Andre Caetano Vidal 201665010AC
+%% Bernardo Souza Abreu Cruz 201635019
+
 % Auxiliary predicate for executing queries and printing results
 query(Template, Goal) :- 
     findall(Template, Goal, Bag),
@@ -16,14 +19,25 @@ write_lists([H1 | T1], [H2 | T2]) :- write(H1), write(' '), write(H2), nl, write
 
 % Calculates the IRA from a Student
 ira(Student, Ira) :- 
-    findall(Grade, student_course(Student, _, Grade), Grades), 
-    sum_list(Grades, Sum), 
-    length(Grades, Length),
-    Ira is Sum / Length.
+    findall(Course, student_course(Student, Course, _), Courses), 
+    sum_grades_x_credits(Student, Courses, SumGrades),
+    total_credits(Courses, TotalCredits),
+    Ira is SumGrades / TotalCredits.
 
-% Sum all elements of a list
-sum_list([], 0).
-sum_list([H | T], Sum) :-  sum_list(T, Rest), Sum is H + Rest.
+% Sum of (grades * credits) for a student's courses
+sum_grades_x_credits(_, [], 0).
+sum_grades_x_credits(Student, [H | T], Sum) :-
+    sum_grades_x_credits(Student, T, Rest),
+    student_course(Student, H, Grade),
+    course(H, Credits),
+    Sum is (Grade * Credits) + Rest.
+
+% Total of credits for a list of courses
+total_credits([], 0).
+total_credits([H | T], Total) :-
+    total_credits(T, Rest),
+    course(H, Credits),
+    Total is Credits + Rest.
 
 % Auxiliary predicate to add entities and relationships
 add(Predicate) :- not(Predicate), assertz(Predicate).

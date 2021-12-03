@@ -1,62 +1,65 @@
-:- dynamic(course/1).
-course('DCC160').
-course('MAT155').
-course('MAT154').
-course('DCC179').
-course('DCC119').
-course('DCC120').
-course('DCC175').
-course('MAT158').
-course('MAT156').
-course('FIS073').
-course('FIS077').
-course('DCC013').
-course('DCC107').
-course('MAT143').
-course('MAT157').
-course('DCC059').
-course('DCC122').
-course('DCC025').
-course('EADDCC044').
-course('MAT029').
-course('EST028').
-course('DCC070').
-course('DCC012').
-course('DCC117').
-course('EST029').
-course('DCC014').
-course('DCC062').
-course('DCC060').
-course('DCC061').
-course('DCC163').
-course('DCC063').
-course('DCC042').
-course('DCC008').
-course('DCC174').
-course('DCC075').
-course('DCC055').
-course('DCC001').
-course('DCC065').
-course('DCC019').
-course('DCC045').
-course('DCC064').
-course('DCC123').
-course('DCC110').
-course('DCC133').
-course('DCC121').
-course('CAD076').
-course('EADDCC049').
-course('FIN001').
-course('DCC146').
-course('DCC192').
-course('DCC193').
-course('DCC049').
-course('DCC154').
-course('DCC168').
-course('DCC078').
-course('DCC077').
-course('DCC145').
-course('DCC196').
-course('DCC166').
-course('DCC165').
-course('DCC194').
+%% Andre Caetano Vidal 201665010AC
+%% Bernardo Souza Abreu Cruz 201635019
+
+:- dynamic(course/2).
+course('DCC160', 4).
+course('MAT155', 4).
+course('MAT154', 4).
+course('DCC179', 2).
+course('DCC119', 4).
+course('DCC120', 2).
+course('DCC175', 2).
+course('MAT158', 4).
+course('MAT156', 4).
+course('FIS073', 4).
+course('FIS077', 2).
+course('DCC013', 4).
+course('DCC107', 2).
+course('MAT143', 4).
+course('MAT157', 4).
+course('DCC059', 4).
+course('DCC122', 4).
+course('DCC025', 4).
+course('EADDCC044', 2).
+course('MAT029', 4).
+course('EST028', 4).
+course('DCC070', 4).
+course('DCC012', 4).
+course('DCC117', 4).
+course('EST029', 4).
+course('DCC014', 4).
+course('DCC062', 4).
+course('DCC060', 4).
+course('DCC061', 4).
+course('DCC163', 4).
+course('DCC063', 4).
+course('DCC042', 4).
+course('DCC008', 4).
+course('DCC174', 4).
+course('DCC075', 4).
+course('DCC055', 4).
+course('DCC001', 4).
+course('DCC065', 4).
+course('DCC019', 4).
+course('DCC045', 4).
+course('DCC064', 4).
+course('DCC123', 4).
+course('DCC110', 4).
+course('DCC133', 4).
+course('DCC121', 2).
+course('CAD076', 4).
+course('EADDCC049', 4).
+course('FIN001', 4).
+course('DCC146', 4).
+course('DCC192', 4).
+course('DCC193', 2).
+course('DCC049', 4).
+course('DCC154', 4).
+course('DCC168', 4).
+course('DCC078', 4).
+course('DCC077', 4).
+course('DCC145', 4).
+course('DCC196', 2).
+course('DCC166', 4).
+course('DCC165', 4).
+course('DCC194', 8).

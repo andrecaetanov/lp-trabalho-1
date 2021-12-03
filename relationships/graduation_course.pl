@@ -1,3 +1,6 @@
+%% Andre Caetano Vidal 201665010AC
+%% Bernardo Souza Abreu Cruz 201635019
+
 :- dynamic(graduation_course/2).
 graduation_course('Ciencia da Computacao', 'DCC160').
 graduation_course('Ciencia da Computacao', 'MAT155').

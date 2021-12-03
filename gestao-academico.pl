@@ -1,8 +1,3 @@
-% TODO
-% Testar todos os predicados
-% Escrever relatório
-% Acrescentar peso das disciplinas no cálculo do IRA (?)
-
 %% Andre Caetano Vidal 201665010AC
 %% Bernardo Souza Abreu Cruz 201635019
 
@@ -33,12 +28,12 @@ courses_in_graduation(Graduation) :-
 
 % Students that have taken a course
 have_taken(Course) :- 
-    course(Course),
+    course(Course, _),
     query(Student, student_course(Student, Course, _)).
 
 % Students that has taken a course with a minimum grade
 have_taken(Course, MinimumGrade) :-
-    course(Course),
+    course(Course, _),
     query(Student, (student_course(Student, Course, Grade), Grade >= MinimumGrade)).
 
 % Courses that one student is yet to take
@@ -49,7 +44,7 @@ courses_left(Student) :-
 % Check if a student still needs to take a course 
 took_course(Student, Course) :- 
     student(Student),
-    course(Course),
+    course(Course, _),
     student_graduation(Student, Graduation), 
     graduation_course(Graduation, Course), 
     not((student_course(Student, Course, Grade), Grade >= 60)).
@@ -67,12 +62,12 @@ students_in_graduation(Graduation, MinimumIra) :-
 % Students from a graduation with a minimum grade in a course
 students_in_graduation(Graduation, Course, MinimumGrade) :-
     graduation(Graduation),
-    course(Course),
+    course(Course, _),
     query(Student, (student_graduation(Student, Graduation), student_course(Student, Course, Grade), Grade >= MinimumGrade)).
 
 % Graduations with a course
 graduations_with_course(Course) :- 
-    course(Course),
+    course(Course, _),
     query(Graduation, graduation_course(Graduation, Course)).
 
 % Add a student if he doesn't already exist
@@ -82,7 +77,7 @@ add_student(Student) :- add(student(Student)).
 add_graduation(Graduation) :- add(graduation(Graduation)).
 
 % Add a course if it doesn't already exist
-add_course(Course) :- add(course(Course)).
+add_course(Course, Credits) :- not(course(Course, _)), assertz(course(Course, Credits)).
 
 % Remove a student and all their relationships
 remove_student(Student) :- 
@@ -98,7 +93,8 @@ remove_graduation(Graduation) :-
 
 % Remove a course and all their relationships
 remove_course(Course) :- 
-    retract(course(Course)),
+    course(Course, Credits),
+    retract(course(Course, Credits)),
     retractall(student_course(_, Course, _)),
     retractall(graduation_course(_, Course)).
 
@@ -145,10 +141,11 @@ edit_graduation_courses(GraduationOldName, GraduationNewName, [H | T]) :-
     assertz(graduation_course(GraduationNewName, H)),
     edit_graduation_courses(GraduationOldName, GraduationNewName, T).
 
-% Edit a course and all the relationships it is part of
-edit_course(OldName, NewName) :- 
-    retract(course(OldName)), 
-    assertz(course(NewName)),
+% Edit a course's name and all the relationships it is part of
+edit_course_name(OldName, NewName) :- 
+    course(OldName, Credits),
+    retract(course(OldName, Credits)), 
+    assertz(course(NewName, Credits)),
     findall(Student, student_course(Student, OldName, _), Students),
     edit_course_students(OldName, NewName, Students),
     findall(Graduation, graduation_course(Graduation, OldName), Graduations),
@@ -167,6 +164,12 @@ edit_course_graduations(CourseOldName, CourseNewName, [H | T]) :-
     assertz(graduation_course(H, CourseNewName)),
     edit_course_graduations(CourseOldName, CourseNewName, T).
 
+% Edit a course's credits
+edit_course_credits(Name, NewCredits) :- 
+    course(Name, OldCredits),
+    retract(course(Name, OldCredits)),
+    assertz(course(Name, NewCredits)).
+
 % Adds a relationship between student and graduation if they exist and if that relationship doesn't
 add_student_graduation(Student, Graduation) :- 
     student(Student), 
@@ -176,13 +179,13 @@ add_student_graduation(Student, Graduation) :-
 % Adds a relationship between student and course if they exist and there is no relationship between them with a given grade
 add_student_course(Student, Course, Grade) :- 
     student(Student),
-    course(Course),
+    course(Course, _),
     add(student_course(Student, Course, Grade)).
 
 % Adds a relationship between graduation and course if they exist and if that relationship doesn't
 add_graduation_course(Graduation, Course) :- 
     graduation(Graduation),
-    course(Course),
+    course(Course, _),
     add(graduation_course(Graduation, Course)).
 
 % Remove a relationship between student and graduation
