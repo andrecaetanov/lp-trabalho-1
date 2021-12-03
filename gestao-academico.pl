@@ -10,6 +10,7 @@
 % Documentar código
 % Testar todos os predicados
 % Escrever relatório
+% Separar código em diferentes arquivos
 % Acrescentar peso das disciplinas no cálculo do IRA (?)
 
 %% Andre Caetano Vidal 201665010AC
@@ -644,9 +645,9 @@ graduations_with_course(Course) :-
     query(Graduation, graduation_course(Graduation, Course)).
 
 % Add entities
-add_student(Student) :- assertz(student(Student)).
-add_graduation(Graduation) :- assertz(graduation(Graduation)).
-add_course(Course) :- assertz(course(Course)).
+add_student(Student) :- add(student(Student)).
+add_graduation(Graduation) :- add(graduation(Graduation)).
+add_course(Course) :- add(course(Course)).
 
 % Remove entities
 remove_student(Student) :- 
@@ -698,17 +699,17 @@ edit_course(OldName, NewName) :-
 add_student_graduation(Student, Graduation) :- 
     student(Student), 
     graduation(Graduation),
-    assertz(student_graduation(Student, Graduation)).
+    add(student_graduation(Student, Graduation)).
 
 add_student_course(Student, Course, Grade) :- 
     student(Student),
     course(Course),
-    assertz(student_course(Student, Course, Grade)).
+    add(student_course(Student, Course, Grade)).
 
 add_graduation_course(Graduation, Course) :- 
     graduation(Graduation),
     course(Course),
-    assertz(graduation_course(Graduation, Course)).
+    add(graduation_course(Graduation, Course)).
 
 % Remove relationships
 remove_student_graduation(Student, Graduation) :- retract(student_graduation(Student, Graduation)).
@@ -716,7 +717,7 @@ remove_student_course(Student, Course, Grade) :- retract(student_course(Student,
 remove_graduation_course(Graduation, Course) :- retract(graduation_course(Graduation, Course)).
 
 % Edit relationships
-edit_student_course_grade(Student, Course, OldGrade, NewGrade) :-
+edit_grade(Student, Course, OldGrade, NewGrade) :-
     retract(student_course(Student, Course, OldGrade)),
     assertz(student_course(Student, Course, NewGrade)).
 
@@ -740,3 +741,6 @@ ira(Student, Ira) :-
 % Sum all elements of a list
 sum_list([], 0).
 sum_list([H | T], Sum) :-  sum_list(T, Rest), Sum is H + Rest.
+
+% Auxiliary predicate to add entities and relationships
+add(Predicate) :- not(Predicate), assertz(Predicate).
