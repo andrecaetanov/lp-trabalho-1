@@ -1,6 +1,4 @@
 % TODO
-% Corrigir nomes duplicados nos resultados da query have_taken
-% Imprimir histórico com as notas em cada disciplina
 % Testar todos os predicados
 % Escrever relatório
 % Acrescentar peso das disciplinas no cálculo do IRA (?)
@@ -23,8 +21,10 @@
 
 % Records from a student
 student_records(Student) :- 
-    student(Student), 
-    query(Course, student_course(Student, Course, _)).
+    student(Student),
+    findall(Course, student_course(Student, Course, _), Courses),
+    findall(Grade, student_course(Student, _, Grade), Grades),
+    write_lists(Courses, Grades).
 
 % Course catalog of a graduation
 courses_in_graduation(Graduation) :- 
